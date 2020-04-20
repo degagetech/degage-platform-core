@@ -317,7 +317,7 @@ namespace Degage.Reflection.Proxies
                             parameterTypes[i] = parameters[i].ParameterType;
                         }
                         parameterTypes[parameters.Length] = proxiedMethodInfo.ReturnParameter.ParameterType;
-                        methodGenericType = typeof(Func<>).MakeGenericType(parameterTypes);
+                        methodGenericType = ObjectProxy<T>.GetFunType(parameters.Length);
                     }
                     var ftn = proxiedMethodInfo.MethodHandle.GetFunctionPointer();
                     var baseMethod = (Delegate)Activator.CreateInstance(methodGenericType, proxy, ftn);
@@ -343,7 +343,7 @@ namespace Degage.Reflection.Proxies
             var errorInfo = String.Format("被代理的方法未被正确处理：{0}。", proxiedMethodInfo.ToString());
             throw new ObjectProxyException(errorInfo);
         }
-
+     
         public static Type GetFunType(Int32 parameterCount)
         {
             Type type = typeof(Func<>);
