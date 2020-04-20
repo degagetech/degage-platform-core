@@ -25,7 +25,7 @@ namespace Degage.Reflection.Proxies
         /// 记录基元值类型与 Load IL 指令的映射关系
         /// </summary>
         public static Dictionary<Type, OpCode> BaseValueTypeLdOpCodeTable { get; private set; }
-        =new Dictionary<Type, OpCode>();
+        = new Dictionary<Type, OpCode>();
 #endif
         static BaseObjectProxy()
         {
@@ -147,7 +147,7 @@ namespace Degage.Reflection.Proxies
             var checkProxyType = proxiedType.IsInterface || proxiedType.IsAbstract || proxiedType.IsClass;
             if (!checkProxyType)
             {
-                throw new Exception(ProxiesSR.E_ObjectFactoryProxyTypeInvaild);
+                throw new Exception("代理类型无效！只能为接口、抽象类、类。");
             }
             var proxyType = ObjectProxy<T>.ProxyType;
             var proxy = Activator.CreateInstance(proxyType, this);
@@ -259,7 +259,7 @@ namespace Degage.Reflection.Proxies
             var proxiedMethodInfo = ObjectProxy<T>.ProxiedMethodInfos[proxiedMethodIndex];
             if (ObjectProxy<T>.IgnoredProxiedMember(proxiedMethodInfo))
             {
-                var formatInfo = String.Format(ProxiesSR.EF_IgnoredProxiedMemberWithAbstract, proxiedMethodInfo.Name);
+                var formatInfo = String.Format("{0}：此代理成员已被忽略，且尚未实现", proxiedMethodInfo.Name);
                 throw new ObjectProxyException(formatInfo);
             }
             MethodInterceptArgs args = new MethodInterceptArgs();
@@ -311,7 +311,7 @@ namespace Degage.Reflection.Proxies
                     else
                     {
                         var parameters = proxiedMethodInfo.GetParameters();
-                        Type[] parameterTypes = new Type[parameters.Length+1];
+                        Type[] parameterTypes = new Type[parameters.Length + 1];
                         for (Int32 i = 0; i < parameters.Length; i++)
                         {
                             parameterTypes[i] = parameters[i].ParameterType;
@@ -340,8 +340,53 @@ namespace Degage.Reflection.Proxies
                     }
                 }
             }
-            var errorInfo = String.Format(ProxiesSR.EF_ProxiedMethodHandleErrorFormat, proxiedMethodInfo.ToString());
+            var errorInfo = String.Format("被代理的方法未被正确处理：{0}。", proxiedMethodInfo.ToString());
             throw new ObjectProxyException(errorInfo);
+        }
+
+        public static Type GetFunType(Int32 parameterCount)
+        {
+            Type type = typeof(Func<>);
+            switch (parameterCount)
+            {
+                case 1:
+                    {
+                        type = typeof(Func<,>);
+                    }
+                    break;
+                case 2:
+                    {
+                        type = typeof(Func<,,>);
+                    }
+                    break;
+                case 3:
+                    {
+                        type = typeof(Func<,,,>);
+                    }
+                    break;
+                case 4:
+                    {
+                        type = typeof(Func<,,,,>);
+                    }
+                    break;
+                case 5:
+                    {
+                        type = typeof(Func<,,,,,>);
+                    }
+                    break;
+                case 6:
+                    {
+                        type = typeof(Func<,,,,,,>);
+                    }
+                    break;
+                case 7:
+                    {
+                        type = typeof(Func<,,,,,,,>);
+                    }
+                    break;
+                    //...
+            }
+            return type;
         }
 
         protected static Type CreateDynamicProxyType(Type proxiedType)
@@ -349,7 +394,7 @@ namespace Degage.Reflection.Proxies
             Type type = null;
             if (BaseObjectProxy.DisabledProxyTypeDynamicCreate)
             {
-                throw new Exception(ProxiesSR.E_CLRNotSupported);
+                throw new Exception("当前运行时不支持创建动态代理类！");
             }
 #if !NETSTANDARD2_0
             //在模块中构建类型
@@ -464,7 +509,7 @@ namespace Degage.Reflection.Proxies
 
                 //加载 _objectProxy 字段
                 iLGenerator.Emit(OpCodes.Ldarg_0);
-                iLGenerator.Emit(OpCodes.Ldfld,proxyField);
+                iLGenerator.Emit(OpCodes.Ldfld, proxyField);
 
                 iLGenerator.Emit(OpCodes.Ldc_I4, methodIndex);
 
