@@ -317,7 +317,7 @@ namespace Degage.Reflection.Proxies
                             parameterTypes[i] = parameters[i].ParameterType;
                         }
                         parameterTypes[parameters.Length] = proxiedMethodInfo.ReturnParameter.ParameterType;
-                        methodGenericType = ObjectProxy<T>.GetFunType(parameters.Length);
+                        methodGenericType = typeof(Func<>).MakeGenericType(parameterTypes);
                     }
                     var ftn = proxiedMethodInfo.MethodHandle.GetFunctionPointer();
                     var baseMethod = (Delegate)Activator.CreateInstance(methodGenericType, proxy, ftn);
@@ -344,50 +344,6 @@ namespace Degage.Reflection.Proxies
             throw new ObjectProxyException(errorInfo);
         }
      
-        public static Type GetFunType(Int32 parameterCount)
-        {
-            Type type = typeof(Func<>);
-            switch (parameterCount)
-            {
-                case 1:
-                    {
-                        type = typeof(Func<,>);
-                    }
-                    break;
-                case 2:
-                    {
-                        type = typeof(Func<,,>);
-                    }
-                    break;
-                case 3:
-                    {
-                        type = typeof(Func<,,,>);
-                    }
-                    break;
-                case 4:
-                    {
-                        type = typeof(Func<,,,,>);
-                    }
-                    break;
-                case 5:
-                    {
-                        type = typeof(Func<,,,,,>);
-                    }
-                    break;
-                case 6:
-                    {
-                        type = typeof(Func<,,,,,,>);
-                    }
-                    break;
-                case 7:
-                    {
-                        type = typeof(Func<,,,,,,,>);
-                    }
-                    break;
-                    //...
-            }
-            return type;
-        }
 
         protected static Type CreateDynamicProxyType(Type proxiedType)
         {
